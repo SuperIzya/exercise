@@ -1,6 +1,7 @@
 package com.tokagroup.exercise.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import com.tokagroup.exercise.Settings
 import com.tokagroup.exercise.actors.ManagerActor.Watch
 import org.apache.zookeeper.Watcher.Event.KeeperState
 import org.apache.zookeeper.{WatchedEvent, ZooKeeper}
@@ -55,10 +56,11 @@ class ManagerActor(host: String,
 }
 
 object ManagerActor {
-  def props(host: String,
-            port: Int,
-            sessionTimeout: FiniteDuration) =
-    Props(new ManagerActor(host, port, sessionTimeout))
+  val props = Props(new ManagerActor(
+    Settings.zookeeperHost,
+    Settings.zookeeperPort,
+    Settings.zookeeperTimeout
+  ))
 
   case class Watch(path: String, watcher: ActorRef)
 }

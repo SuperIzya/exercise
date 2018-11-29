@@ -7,8 +7,14 @@ import akka.stream.{ActorMaterializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.tokagroup.exercise.actors.ManagerActor
 
-import scala.language.postfixOps
 
+/***
+  * Http server based on akka-http
+  * @param interface - interface to listen to
+  * @param port - port to listen
+  * @param actorSystem - actor system of current run
+  * @param materializer - actor materializer of current run (for Flow)
+  */
 class HttpServer private(interface: String, port: Int)
                         (implicit actorSystem: ActorSystem,
                          materializer: ActorMaterializer) {
@@ -16,11 +22,7 @@ class HttpServer private(interface: String, port: Int)
   import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
   val log = actorSystem.log
-  val manager = actorSystem.actorOf(ManagerActor.props(
-    Settings.zookeeperHost,
-    Settings.zookeeperPort,
-    Settings.zookeeperTimeout
-  ))
+  val manager = actorSystem.actorOf(ManagerActor.props)
 
   val routes = cors() {
     (pathPrefix("socket") & extractRequest & extractUnmatchedPath) {

@@ -35,12 +35,12 @@ module.exports = ({
     publicPath: '/',
     filename: path.join('web', 'bundle-[hash].js')
   },
-  devServer: {
-    contentBase: outputDir,
-  },
   context: path.resolve(__dirname, 'web'),
   mode: 'development',
   devtool: 'source-map',
+  watchOptions: {
+    ignored: ['*.scala', /node_modules/, /target/]
+  },
   module: { rules },
   resolve: {
     extensions: ['*', '.jsx', '.js']

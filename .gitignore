@@ -2,5 +2,7 @@
 .idea/
 **/target/
 
+package-lock.json
+
 node_modules/
 src/main/resources/web

@@ -1,7 +1,30 @@
 @import '../style/mixins';
 
 .tabContainer {
-  @include scrollable-y;
   margin-top: 5px;
-  height: 300px;
+
+  .scrollerContainer {
+    display: flex;
+    flex-flow: column;
+    flex: 1;
+
+    .scroller {
+      @include scrollable-y();
+
+      .logs {
+        display: grid;
+        grid-template-rows: auto;
+        grid-template-columns: max-content max-content;
+        grid-column-gap: 4px;
+
+        .log {
+          padding-right: 10px;
+        }
+
+        .timestamp {
+          padding: 0 5px;
+        }
+      }
+    }
+  }
 }

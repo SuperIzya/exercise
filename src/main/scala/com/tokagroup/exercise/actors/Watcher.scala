@@ -31,6 +31,7 @@ class Watcher(path: String,
     })
 
   def sendEvent(event: String): Unit = {
+    log.info(s"Event $event happened")
     subscribers.route(s"$path: $event", self)
   }
 
@@ -57,8 +58,7 @@ class Watcher(path: String,
 }
 
 object Watcher {
-  def props(path: String,
-            zkConnection: ZooKeeper) = Props(new Watcher(path, zkConnection))
+  def props(path: String, zkConnection: ZooKeeper) = Props(new Watcher(path, zkConnection))
 
   case class Subscribe(subscriber: ActorRef)
 }

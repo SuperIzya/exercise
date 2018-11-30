@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  justify-content: flex-end;
+
+  .form {
+    display: flex;
+    flex-direction: column;
+
+    .button {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .fields {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}

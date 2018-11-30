@@ -2,12 +2,15 @@ package com.tokagroup.exercise
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model.ws.{Message, TextMessage, UpgradeToWebSocket}
 import akka.stream.{ActorMaterializer, OverflowStrategy}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.tokagroup.exercise.actors.{Manager, SocketManager}
 import com.tokagroup.exercise.model.WriteToNode
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, JsSuccess, Json}
+
+import scala.util.{Failure, Success}
 
 
 /** *
@@ -24,6 +27,8 @@ class HttpServer private(interface: String, port: Int)
 
   import akka.http.scaladsl.server.Directives._
   import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+
+  import actorSystem.dispatcher
 
   val log = actorSystem.log
   val manager = actorSystem.actorOf(Manager.props)
@@ -46,11 +51,19 @@ class HttpServer private(interface: String, port: Int)
       }
     } ~ post {
       (path("api" / "write") & extractDataBytes) { bytes =>
-        val data = bytes.runFold(StringBuilder.newBuilder)((acc, i) => acc.append(i.utf8String))
-        val json = Json.parse(data.toString)
-        val write = Json.fromJson[WriteToNode](json)
-        manager ! write
-        complete("Ok")
+        onComplete(bytes.runFold(StringBuilder.newBuilder)((acc, i) => acc.append(i.utf8String))) {
+          case Success(data) =>
+            val json = Json.parse(data.toString)
+            Json.fromJson[WriteToNode](json) match {
+              case JsSuccess(write, _) =>
+                log.info(s"Writing to zk $write")
+                manager ! write
+                complete("Ok")
+              case JsError(errors) =>
+                complete((InternalServerError, s"Error while parsing request data $errors"))
+            }
+          case Failure(ex) => complete((InternalServerError, s"An error occurred: ${ex.getMessage}"))
+        }
       }
     }
   }

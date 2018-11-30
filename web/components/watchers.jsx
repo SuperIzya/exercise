@@ -21,7 +21,11 @@ class WatchersList {
   setIndex = index => this.selectedIndex = index;
   
   @action.bound
-  addWatcher = path => this.watchers.push(path);
+  addWatcher = path => {
+    this.watchers.push(path);
+    this.watchData[path] = new PathData();
+    this.selectedIndex = this.watchers.length - 1;
+  };
   
   @action.bound
   toggleFlag = () => this.enterPath = !this.enterPath;
@@ -32,7 +36,7 @@ const headers = list => (path, i) => <WatcherHeader key={i}
                                                     setIndex={() => list.setIndex(i)}
                                                     data={list.watchData[path]}
                                                     path={path}/>;
-                                                    
+
 const content = list => (path, i) => <ZookeeperWatcher key={i}
                                                        path={path}
                                                        data={list.watchData[path]}/>;
@@ -69,19 +73,14 @@ class Watchers extends React.Component {
       list.toggleFlag();
       const path = event.target.value;
       const index = list.watchers.indexOf(path);
-      if (index < 0) {
+      if (index < 0)
         list.addWatcher(path);
-        list.watchData[path] = new PathData();
-        list.setIndex(list.watchers.length - 1);
-      } else list.setIndex(index);
+      else list.setIndex(index);
     }
   };
   
   
-  setIndex = (evt, index) => {
-    debugger;
-    this.props.list.setIndex(index);
-  };
+  setIndex = (evt, index) => this.props.list.setIndex(index);
   
   render() {
     const list = this.props.list;

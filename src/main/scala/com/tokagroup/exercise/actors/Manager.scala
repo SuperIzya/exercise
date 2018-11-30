@@ -71,14 +71,15 @@ class Manager(host: String,
       val data = ByteString(stringData, "utf-8").toArray
       val callback: StatCallback = (_, _, _, stat: Stat) => {
         if (stat == null) {
-          log.info(s"Creating node $path with data $stringData")
+          log.info(s"Creating node $path with log $stringData")
           zkConnection.create(path, data, new util.ArrayList[ACL](), CreateMode.PERSISTENT)
         }
         else {
-          log.info(s"Writing to node $path data $stringData")
+          log.info(s"Writing to node $path log $stringData")
           zkConnection.setData(path, data, 1)
         }
       }
+      log.info("Going to write data to zk")
       zkConnection.exists(path, false, callback, null)
     case Terminated(actor) => reverseMap.get(actor) match {
       case Some(path) =>

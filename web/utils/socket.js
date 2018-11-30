@@ -9,7 +9,7 @@ class Socket {
   
   connectSocket = () => {
     console.log('Connecting to socket');
-    this.socket = new WebSocket(`ws://${window.location.hostname}:${serverPort}/api/socket`);
+    this.socket = new WebSocket(`ws://${window.location.hostname}/api/socket`);
     this.socket.onopen = () => this.isReady.next(true);
     this.socket.onclose = () => {
       console.log("Socket closed");

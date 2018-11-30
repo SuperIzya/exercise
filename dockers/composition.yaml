@@ -10,18 +10,18 @@ services:
 
   backend:
     image: openjdk
-    command: /bin/bash /var/data/pack/bin/watchZK
+    command: /bin/bash /var/log/pack/bin/watchZK
     ports:
-      - "8080:8080"
+      - "80:80"
     environment:
       - ZK_HOST=zookeeper
       - ZK_PORT=32181
       - ZK_TIMEOUT=2 seconds
-      - BIND_PORT=8080
+      - BIND_PORT=80
       - INTERFACE=backend
     depends_on:
       - zookeeper
     links:
       - zookeeper
     volumes:
-      - ../target/pack:/var/data/pack
+      - ../target/pack:/var/log/pack

@@ -2,7 +2,7 @@ package com.tokagroup.exercise.actors
 
 import java.util
 
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import akka.util.ByteString
 import com.tokagroup.exercise.Settings
 import com.tokagroup.exercise.actors.Manager.Watch
@@ -26,6 +26,8 @@ class Manager(host: String,
   var zkConnection: ZooKeeper = connect
   // Map of all watchers (path -> WatcherActor)
   var watchers: Map[String, ActorRef] = Map.empty
+  // Reverse map of watcher. Needed for convenient delete
+  var reverseMap: Map[ActorRef, String] = Map.empty
 
   def connect: ZooKeeper = new ZooKeeper(
     s"$host:$port",
@@ -52,13 +54,18 @@ class Manager(host: String,
       actor
     case None =>
       log.info(s"Creating watcher actor for path $path")
-      val actor = context.actorOf(Watcher.props(subscriber, path, zkConnection))
+      val actor = context.actorOf(Watcher.props(path, zkConnection))
+      context watch actor
       watchers += path -> actor
+      reverseMap += actor -> path
+      actor ! Watcher.Subscribe(subscriber)
       actor
   }
 
   override def receive: Receive = {
-    case 'reconnect => zkConnection = connect
+    case 'reconnect =>
+      log.info("Connection to zookeeper terminated. Reconnecting")
+      zkConnection = connect
     case Watch(path, watcher) => getWatcher(path, watcher)
     case WriteToNode(path, stringData) =>
       val data = ByteString(stringData, "utf-8").toArray
@@ -73,6 +80,12 @@ class Manager(host: String,
         }
       }
       zkConnection.exists(path, false, callback, null)
+    case Terminated(actor) => reverseMap.get(actor) match {
+      case Some(path) =>
+        watchers = watchers - path
+        reverseMap = reverseMap - actor
+      case None =>
+    }
   }
 
   override def postStop(): Unit = {

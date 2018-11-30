@@ -1,3 +1,7 @@
+@import '../style/mixins';
+
 .tabContainer {
+  @include scrollable-y;
   margin-top: 5px;
+  height: 300px;
 }

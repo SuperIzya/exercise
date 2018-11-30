@@ -63,17 +63,17 @@ class HttpServer private(interface: String, port: Int)
     * @return - flow that emits messages with events for the watched path
     */
   def socketFlow: Flow[Message, Message, _] = {
-    val sm = actorSystem.actorOf(SocketManager.props(manager))
+    val socketManager = actorSystem.actorOf(SocketManager.props(manager))
     val source = Source.actorRef[String](1, OverflowStrategy.dropHead)
       .mapMaterializedValue(a => {
-        sm ! SocketManager.Source(a)
+        socketManager ! SocketManager.Source(a)
         a
       })
       .map(TextMessage(_))
 
     val sink = Flow[Message]
       .map(_.asTextMessage.getStrictText)
-      .map(sm ! SocketManager.WatchPath(_))
+      .map(socketManager ! SocketManager.WatchPath(_))
       .to(Sink.ignore)
 
     Flow.fromSinkAndSourceCoupled(sink, source)

@@ -13,12 +13,11 @@ import org.apache.zookeeper.{WatchedEvent, ZooKeeper}
   * @param path         - path to watch
   * @param zkConnection - connection to ZK
   */
-class Watcher(subscriber: ActorRef,
-              path: String,
+class Watcher(path: String,
               zkConnection: ZooKeeper)
   extends Actor with ActorLogging {
 
-  var subscribers = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee]).addRoutee(subscriber)
+  var subscribers = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
   var active = true
 
   /***
@@ -39,8 +38,10 @@ class Watcher(subscriber: ActorRef,
     case Subscribe(actor) =>
       context watch actor
       subscribers = subscribers.addRoutee(actor)
+      log.info(s"Added subscriber #${subscribers.routees.size}")
     case Terminated(actor) =>
       subscribers = subscribers.removeRoutee(actor)
+      log.info(s"One of the subscribers terminated. ${subscribers.routees.size} subscribers left")
       // If no subscribers left, terminate the actor
       if(subscribers.routees.isEmpty) {
         log.info(s"Closing watcher actor for path $path since no subscribers left")
@@ -56,9 +57,8 @@ class Watcher(subscriber: ActorRef,
 }
 
 object Watcher {
-  def props(subscriber: ActorRef,
-            path: String,
-            zkConnection: ZooKeeper) = Props(new Watcher(subscriber, path, zkConnection))
+  def props(path: String,
+            zkConnection: ZooKeeper) = Props(new Watcher(path, zkConnection))
 
   case class Subscribe(subscriber: ActorRef)
 }

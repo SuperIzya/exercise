@@ -23,12 +23,14 @@ class Watcher(path: String,
   /***
     * Start actually watching the z-node
     */
-  def startWatch: Unit = zkConnection.exists(
-    path,
-    (event: WatchedEvent) => if(active) {
-      self ! event.getType
-      startWatch
-    })
+  def startWatch: Unit = {
+    val stat = zkConnection.exists(
+      path,
+      (event: WatchedEvent) => if(active) {
+        self ! event.getType
+        startWatch
+      })
+  }
 
   def sendEvent(event: String): Unit = {
     log.info(s"Event $event happened")

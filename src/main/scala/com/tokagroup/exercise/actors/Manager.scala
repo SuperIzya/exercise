@@ -1,6 +1,6 @@
 package com.tokagroup.exercise.actors
 
-import java.util
+import java.io.IOException
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props, Terminated}
 import akka.util.ByteString
@@ -9,7 +9,8 @@ import com.tokagroup.exercise.actors.Manager.Watch
 import com.tokagroup.exercise.model.WriteToNode
 import org.apache.zookeeper.AsyncCallback.StatCallback
 import org.apache.zookeeper.Watcher.Event.KeeperState
-import org.apache.zookeeper.data.{ACL, Stat}
+import org.apache.zookeeper.ZooDefs.Ids
+import org.apache.zookeeper.data.Stat
 import org.apache.zookeeper.{CreateMode, WatchedEvent, ZooKeeper}
 
 import scala.concurrent.duration.FiniteDuration
@@ -22,6 +23,8 @@ class Manager(host: String,
               sessionTimeout: FiniteDuration)
   extends Actor with ActorLogging {
 
+  val connectionString = s"$host:$port"
+
   // Connection to the zookeeper
   var zkConnection: ZooKeeper = connect
   // Map of all watchers (path -> WatcherActor)
@@ -29,14 +32,16 @@ class Manager(host: String,
   // Reverse map of watcher. Needed for convenient delete
   var reverseMap: Map[ActorRef, String] = Map.empty
 
-  def connect: ZooKeeper = new ZooKeeper(
-    s"$host:$port",
-    sessionTimeout.toMillis.toInt,
-    watchConnection)
+  def connect: ZooKeeper = new ZooKeeper(connectionString, sessionTimeout.toMillis.toInt, watchConnection)
 
   def watchConnection(event: WatchedEvent): Unit = event.getState match {
     case KeeperState.Disconnected => self ! 'reconnect
     case KeeperState.Expired => self ! 'reconnect
+    case KeeperState.SyncConnected =>
+      log.info("Successfully connected to zookeeper")
+
+      if(zkConnection.exists("/", false) == null)
+        throw new IOException("Zookeeper is inaccessible")
     case _ =>
   }
 
@@ -71,8 +76,10 @@ class Manager(host: String,
       val data = ByteString(stringData, "utf-8").toArray
       val callback: StatCallback = (_, _, _, stat: Stat) => {
         if (stat == null) {
-          log.info(s"Creating node $path with log $stringData")
-          zkConnection.create(path, data, new util.ArrayList[ACL](), CreateMode.PERSISTENT)
+
+          val acl = Ids.OPEN_ACL_UNSAFE
+          val res = zkConnection.create(path, data, acl, CreateMode.PERSISTENT)
+          log.info(s"Created node $path with log $stringData. Result: $res")
         }
         else {
           log.info(s"Writing to node $path log $stringData")

@@ -9,8 +9,8 @@ services:
       - ZOOKEEPER_CLIENT_PORT=32181
 
   backend:
-    image: openjdk
-    command: /bin/bash /var/log/pack/bin/watchZK
+    image: confluentinc/cp-zookeeper
+    command: /bin/bash /data/start-server.sh
     ports:
       - "80:80"
     environment:
@@ -24,4 +24,5 @@ services:
     links:
       - zookeeper
     volumes:
-      - ../target/pack:/var/log/pack
+      - ../target/pack:/data/pack
+      - ./start-server.sh:/data/start-server.sh

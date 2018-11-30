@@ -9,15 +9,16 @@ module.exports = [{
         '@babel/preset-react'
       ],
       plugins: [
+        ['@babel/plugin-proposal-decorators', { 'legacy': true }],
         '@babel/plugin-proposal-object-rest-spread',
         'transform-class-properties',
         [require('babel-plugin-react-css-modules'), {
           generateScopedName: '[path]_[name]_[hash:base64]',
           webpackHotModuleReloading: true,
           filetypes: {
-            ".scss": {
-              syntax: "postcss-scss",
-              plugins: ["postcss-nested"]
+            '.scss': {
+              syntax: 'postcss-scss',
+              plugins: ['postcss-nested']
             }
           }
         }]

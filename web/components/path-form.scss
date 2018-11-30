@@ -1,0 +1,16 @@
+.container {
+  display: flex;
+  position: relative;
+  margin-bottom: 10px;
+  width: 250px;
+
+  .buttons {}
+  .form {
+    padding-left: 10px;
+
+    .text {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+}

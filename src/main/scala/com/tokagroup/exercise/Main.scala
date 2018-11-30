@@ -9,11 +9,10 @@ object Main extends App {
   implicit val executionContext = actorSystem.dispatcher
 
 
-  val f = HttpServer("localhost", 8080).start
+  val f = HttpServer("localhost", Settings.bindPort).start
 
-  /*StdIn.readLine()
-  StdIn.readLine()
+  sys.addShutdownHook({
+    f.flatMap(_.unbind()).onComplete(_ => actorSystem.terminate())
+  })
 
-  f.flatMap(_.unbind()).onComplete(_ => actorSystem.terminate())
-  */
 }

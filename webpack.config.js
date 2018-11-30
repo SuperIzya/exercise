@@ -3,7 +3,7 @@ const CircularDependencyPlugin = require('circular-dependency-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
-const outputDir = path.resolve(__dirname, 'target', 'web');
+const outputDir = path.resolve(__dirname, 'src', 'main', 'resources', 'interface');
 const rules = [].concat(
   require('./web/build/js-rules'),
   require('./web/build/style-rules'),
@@ -25,7 +25,10 @@ const plugins = [
     // set the current working directory for displaying module paths
     cwd: process.cwd(),
   }),
-  new CleanWebpackPlugin(outputDir)
+  new CleanWebpackPlugin([
+    path.join(outputDir, 'web'),
+    path.join(outputDir, 'index.html')
+  ])
 ];
 
 module.exports = ({

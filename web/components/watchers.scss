@@ -1,3 +1,25 @@
 .container {
   display: flex;
+  flex-direction: column;
+
+  .form {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .listContainer {
+    display: flex;
+
+    .list {
+      header {
+        button {
+          text-decoration: none;
+          text-transform: none;
+        }
+      }
+    }
+  }
 }
+

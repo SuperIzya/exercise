@@ -26,6 +26,7 @@ class ManagerActor(host: String,
   def watch(event: WatchedEvent): Unit = event.getState match {
     case KeeperState.Disconnected => self ! 'reconnect
     case KeeperState.Expired => self ! 'reconnect
+    case _ =>
   }
 
   /***

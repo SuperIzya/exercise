@@ -1,9 +1,11 @@
 {
   "scripts": {
-    "start": "webpack --watch --info-verbosity verbose"
+    "start": "webpack",
+    "server": "webpack --watch --info-verbosity verbose"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",
+    "@babel/plugin-proposal-decorators": "^7.1.6",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-react": "^7.0.0",
@@ -42,6 +44,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
+    "react-swipeable-views": "^0.13.0",
     "rxjs": "^6.3.3"
   }
 }

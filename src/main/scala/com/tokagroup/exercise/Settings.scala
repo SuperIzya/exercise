@@ -13,4 +13,5 @@ object Settings {
     val long = to.head.toLong
     FiniteDuration(long, if(to.size == 1) "seconds" else to(1))
   }
+  val bindPort: Int = sys.env.getOrElse("BIND_PORT", "9000").toInt
 }

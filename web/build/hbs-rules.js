@@ -7,6 +7,11 @@ module.exports = [{
       interpolate: true
     }
   }, {
-    loader: 'handlebars-render-loader'
+    loader: 'handlebars-render-loader',
+    options: {
+      data: {
+        port: 9000
+      }
+    }
   }]
 }];

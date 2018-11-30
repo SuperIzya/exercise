@@ -21,3 +21,11 @@ libraryDependencies ++= Seq(
     ExclusionRule(organization = "com.sun.jmx", name = "jmxri")
   )
 )
+
+Compile / resourceGenerators += Def.task {
+  import scala.sys.process._
+  "npm start" !
+
+  val dir = new File((Compile / resourceDirectory).value.getAbsolutePath + "/interface")
+  dir.listFiles().toSeq
+}

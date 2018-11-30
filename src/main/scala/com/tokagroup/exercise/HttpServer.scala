@@ -25,7 +25,13 @@ class HttpServer private(interface: String, port: Int)
   val manager = actorSystem.actorOf(ManagerActor.props)
 
   val routes = cors() {
-    (pathPrefix("socket") & extractRequest & extractUnmatchedPath) {
+    get {
+      pathSingleSlash {
+        getFromResource("interface/index.html")
+      } ~ pathPrefix("web") {
+        getFromResourceDirectory("interface/web")
+      }
+    } ~ (pathPrefix("socket") & extractRequest & extractUnmatchedPath) {
       (request, path) => request.header[UpgradeToWebSocket] match {
         case Some(upgrade) =>
           log.debug("Starting socket")

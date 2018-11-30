@@ -18,11 +18,10 @@ services:
       - ZK_PORT=32181
       - ZK_TIMEOUT=2 seconds
       - BIND_PORT=8080
+      - INTERFACE=backend
     depends_on:
       - zookeeper
     links:
       - zookeeper
     volumes:
-      - type: bind
-        source: ../target/pack
-        target: /var/data/pack
+      - ../target/pack:/var/data/pack

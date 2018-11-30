@@ -10,7 +10,7 @@ module.exports = [{
     loader: 'handlebars-render-loader',
     options: {
       data: {
-        port: 9000
+        port: 8080
       }
     }
   }]

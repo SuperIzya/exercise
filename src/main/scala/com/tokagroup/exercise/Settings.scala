@@ -14,4 +14,5 @@ object Settings {
     FiniteDuration(long, if(to.size == 1) "seconds" else to(1))
   }
   val bindPort: Int = sys.env.getOrElse("BIND_PORT", "9000").toInt
+  val interface: String = sys.env.getOrElse("INTERFACE", "localhost")
 }

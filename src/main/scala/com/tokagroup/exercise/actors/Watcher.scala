@@ -2,7 +2,7 @@ package com.tokagroup.exercise.actors
 
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Props, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
-import com.tokagroup.exercise.actors.WatcherActor.{Subscribe, ZNodeEvent}
+import com.tokagroup.exercise.actors.Watcher.Subscribe
 import org.apache.zookeeper.Watcher.Event.EventType
 import org.apache.zookeeper.{WatchedEvent, ZooKeeper}
 
@@ -13,9 +13,9 @@ import org.apache.zookeeper.{WatchedEvent, ZooKeeper}
   * @param path         - path to watch
   * @param zkConnection - connection to ZK
   */
-class WatcherActor(subscriber: ActorRef,
-                   path: String,
-                   zkConnection: ZooKeeper)
+class Watcher(subscriber: ActorRef,
+              path: String,
+              zkConnection: ZooKeeper)
   extends Actor with ActorLogging {
 
   var subscribers = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee]).addRoutee(subscriber)
@@ -32,7 +32,7 @@ class WatcherActor(subscriber: ActorRef,
     })
 
   def sendEvent(event: String): Unit = {
-    subscribers.route(ZNodeEvent(path, event), self)
+    subscribers.route(s"$path: $event", self)
   }
 
   override def receive: Receive = {
@@ -54,11 +54,10 @@ class WatcherActor(subscriber: ActorRef,
   }
 }
 
-object WatcherActor {
+object Watcher {
   def props(subscriber: ActorRef,
             path: String,
-            zkConnection: ZooKeeper) = Props(new WatcherActor(subscriber, path, zkConnection))
+            zkConnection: ZooKeeper) = Props(new Watcher(subscriber, path, zkConnection))
 
   case class Subscribe(subscriber: ActorRef)
-  case class ZNodeEvent(node: String, event: String)
 }

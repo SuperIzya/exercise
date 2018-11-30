@@ -1,0 +1,14 @@
+.container {
+  width: 100%;
+  height: 200px;
+  background-color: #acacac;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+
+  h1, h2 {
+    display: flex;
+    justify-content: center;
+  }
+
+}

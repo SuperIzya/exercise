@@ -43,6 +43,7 @@ class Watcher(subscriber: ActorRef,
       subscribers = subscribers.removeRoutee(actor)
       // If no subscribers left, terminate the actor
       if(subscribers.routees.isEmpty) {
+        log.info(s"Closing watcher actor for path $path since no subscribers left")
         active = false
         self ! PoisonPill
       }

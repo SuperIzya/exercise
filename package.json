@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "webpack",
-    "server": "webpack --watch --info-verbosity verbose"
+    "dev": "webpack --watch --info-verbosity verbose"
   },
   "devDependencies": {
     "@babel/core": "^7.1.6",

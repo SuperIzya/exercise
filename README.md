@@ -26,6 +26,8 @@ sbt pack
 ./start.sh
 ```  
 
+After everything has started, open in browser [http://localhost](http://localhost)
+
 ## For development
 
 From root folder run  
@@ -37,5 +39,5 @@ and in another terminal run
 ```bash
 npm run dev
 ```
-
+After everything has started, open in browser [http://localhost:8080](http://localhost:8080)
 

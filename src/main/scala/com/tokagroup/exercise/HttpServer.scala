@@ -4,12 +4,13 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes.InternalServerError
 import akka.http.scaladsl.model.ws.{Message, TextMessage, UpgradeToWebSocket}
-import akka.stream.{ActorMaterializer, OverflowStrategy}
+import akka.pattern.ask
 import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.{ActorMaterializer, OverflowStrategy}
+import akka.util.Timeout
 import com.tokagroup.exercise.actors.{Manager, SocketManager}
 import com.tokagroup.exercise.model.WriteToNode
 import play.api.libs.json.{JsError, JsSuccess, Json}
-
 import scala.util.{Failure, Success}
 
 
@@ -25,10 +26,9 @@ class HttpServer private(interface: String, port: Int)
                         (implicit actorSystem: ActorSystem,
                          materializer: ActorMaterializer) {
 
+  import actorSystem.dispatcher
   import akka.http.scaladsl.server.Directives._
   import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-
-  import actorSystem.dispatcher
 
   val log = actorSystem.log
   val manager = actorSystem.actorOf(Manager.props)
@@ -97,7 +97,11 @@ class HttpServer private(interface: String, port: Int)
     *
     * @return Future[Http.ServerBinding]
     */
-  def start = Http().bindAndHandle(routes, interface, port)
+  def start = {
+    import scala.concurrent.duration._
+    implicit val timeout = Timeout(5 minutes)
+    (manager ? 'init).flatMap(_ => Http().bindAndHandle(routes, interface, port))
+  }
 }
 
 object HttpServer {

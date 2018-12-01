@@ -25,6 +25,9 @@ class Manager(host: String,
 
   val connectionString = s"$host:$port"
 
+  var connected: Boolean = false
+  // ActorRef associated with server, when it waits for initial connection
+  var server: ActorRef = _
   // Connection to the zookeeper
   var zkConnection: ZooKeeper = connect
   // Map of all watchers (path -> WatcherActor)
@@ -39,6 +42,9 @@ class Manager(host: String,
     case KeeperState.Expired => self ! 'reconnect
     case KeeperState.SyncConnected =>
       log.info("Successfully connected to zookeeper")
+      connected = true
+
+      if(server != null) server ! 'ok
 
       if(zkConnection.exists("/", false) == null)
         throw new IOException("Zookeeper is inaccessible")
@@ -68,6 +74,9 @@ class Manager(host: String,
   }
 
   override def receive: Receive = {
+    case 'init =>
+      if(!connected) server = sender()
+      else sender() ! 'ok
     case 'reconnect =>
       log.info("Connection to zookeeper terminated. Reconnecting")
       zkConnection = connect
@@ -76,14 +85,13 @@ class Manager(host: String,
       val data = ByteString(stringData, "utf-8").toArray
       val callback: StatCallback = (_, _, _, stat: Stat) => {
         if (stat == null) {
-
           val acl = Ids.OPEN_ACL_UNSAFE
           val res = zkConnection.create(path, data, acl, CreateMode.PERSISTENT)
           log.info(s"Created node $path with log $stringData. Result: $res")
         }
         else {
-          log.info(s"Writing to node $path log $stringData")
-          zkConnection.setData(path, data, 1)
+          log.info(s"Writing to node $path data $stringData, version ${stat.getVersion}")
+          zkConnection.setData(path, data, stat.getVersion)
         }
       }
       log.info("Going to write data to zk")

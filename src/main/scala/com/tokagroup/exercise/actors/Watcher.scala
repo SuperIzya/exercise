@@ -20,17 +20,18 @@ class Watcher(path: String,
   var subscribers = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
   var active = true
 
-  /***
+  startWatch
+
+  /** *
     * Start actually watching the z-node
     */
-  def startWatch: Unit = {
-    val stat = zkConnection.exists(
-      path,
-      (event: WatchedEvent) => if(active) {
-        self ! event.getType
-        startWatch
-      })
-  }
+  def startWatch: Unit = zkConnection.exists(
+    path,
+    (event: WatchedEvent) => if (active) {
+      self ! event.getType
+      startWatch
+    })
+  
 
   def sendEvent(event: String): Unit = {
     log.info(s"Event $event happened")
@@ -46,7 +47,7 @@ class Watcher(path: String,
       subscribers = subscribers.removeRoutee(actor)
       log.info(s"One of the subscribers terminated. ${subscribers.routees.size} subscribers left")
       // If no subscribers left, terminate the actor
-      if(subscribers.routees.isEmpty) {
+      if (subscribers.routees.isEmpty) {
         log.info(s"Closing watcher actor for path $path since no subscribers left")
         active = false
         self ! PoisonPill
@@ -63,4 +64,5 @@ object Watcher {
   def props(path: String, zkConnection: ZooKeeper) = Props(new Watcher(path, zkConnection))
 
   case class Subscribe(subscriber: ActorRef)
+
 }

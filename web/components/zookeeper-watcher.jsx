@@ -12,18 +12,22 @@ const toTime = ts => moment(ts).format('D/M/YYYY H:mm:ss.SSS');
 class PathData {
   @observable dirty = false;
   @observable log = [];
+  isActive = false;
   
-  @action.bound
-  setDirty = () => this.dirty = true;
-  @action.bound
-  setClean = () => this.dirty = false;
+  setActive = flag => {
+    this.isActive = flag;
+    this.dirty = !this.isActive && this.dirty;
+  };
   
-  add = d => this.log.push(d);
+  add = d => {
+    this.log.push(d);
+    this.dirty = !this.isActive;
+  }
 }
 
-const WatcherHeader = observer(({ data, path, setIndex }) => (
+const WatcherHeader = observer(({ data, path, setActive }) => (
   <Tab label={data.dirty ? `${path} *` : path}
-       onClick={setIndex}
+       onClick={setActive}
   />
 ));
 
@@ -49,7 +53,7 @@ class ZookeeperWatcher extends React.Component {
   }
   
   render() {
-    const { data, path } = this.props;
+    const { data } = this.props;
     return (
       <div className={style.tabContainer}>
         <div className={style.scrollerContainer}>

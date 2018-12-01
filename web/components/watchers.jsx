@@ -18,13 +18,16 @@ class WatchersList {
   };
   
   @action.bound
-  setIndex = index => this.selectedIndex = index;
+  setIndex = index => {
+    this.selectedIndex = index;
+    this.watchers.map((w, i) => this.watchData[w].setActive(this.selectedIndex === i));
+  };
   
   @action.bound
   addWatcher = path => {
     this.watchers.push(path);
     this.watchData[path] = new PathData();
-    this.selectedIndex = this.watchers.length - 1;
+    this.setIndex(this.watchers.length - 1);
   };
   
   @action.bound
@@ -33,13 +36,14 @@ class WatchersList {
 }
 
 const headers = list => (path, i) => <WatcherHeader key={i}
-                                                    setIndex={() => list.setIndex(i)}
+                                                    setActive={() => list.setIndex(i)}
                                                     data={list.watchData[path]}
                                                     path={path}/>;
 
 const content = list => (path, i) => <ZookeeperWatcher key={i}
                                                        path={path}
                                                        data={list.watchData[path]}/>;
+  
 
 const WatcherTabs = observer(({ list, indexSetter }) => {
   if (!list.watchers.length) return null;

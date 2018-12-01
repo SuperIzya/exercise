@@ -6,7 +6,7 @@ import { ZookeeperWatcher, WatcherHeader, PathData } from './zookeeper-watcher';
 import Tabs from '@material-ui/core/Tabs/Tabs';
 import AppBar from '@material-ui/core/AppBar/AppBar';
 import SwipeableViews from 'react-swipeable-views';
-import NewPathForm from './path-form';
+import PathForm from './path-form';
 
 class WatchersList {
   @observable watchers = ['/a', '/b'];
@@ -52,6 +52,8 @@ const WatcherTabs = observer(({ list, indexSetter }) => {
       <div className={style.list}>
         <AppBar position={'static'} color={'default'}>
           <Tabs
+            fullWidth={true}
+            centered={true}
             value={list.selectedIndex}
             onChange={indexSetter}
             indicatorColor="primary"
@@ -73,7 +75,7 @@ const WatcherTabs = observer(({ list, indexSetter }) => {
 class Watchers extends React.Component {
   
   onPathChange = list => event => {
-    if (event.nativeEvent && event.nativeEvent.keyCode === 13 && event.target.value) {
+    if (event.target.value) {
       list.toggleFlag();
       const path = event.target.value;
       const index = list.watchers.indexOf(path);
@@ -91,9 +93,9 @@ class Watchers extends React.Component {
     return (
       <div className={style.container}>
         <div className={style.form}>
-          <NewPathForm onPathEntered={this.onPathChange(list)}
-                       enterPathFlag={list.enterPath}
-                       onToggleFlag={list.toggleFlag}/>
+          <PathForm onPathEntered={this.onPathChange(list)}
+                    enterPathFlag={list.enterPath}
+                    onToggleFlag={list.toggleFlag}/>
         </div>
         <WatcherTabs list={list} indexSetter={this.setIndex}/>
       </div>

@@ -29,12 +29,12 @@ const Form = ({ enterPath, onPathEntered }) => !enterPath ? null :
         margin="normal"
         variant="outlined"
         className={style.text}
-        onKeyPress={onPathEntered}
+        onBlur={onPathEntered}
       />
     </Zoom>
   </div>);
 
-const NewPathForm = ({ enterPathFlag, onPathEntered, onToggleFlag }) => (
+const PathForm = ({ enterPathFlag, onPathEntered, onToggleFlag }) => (
   <div className={style.container}>
     <div className={style.buttons}>
       {enterPathFlag ? <CloseButton onPress={onToggleFlag}/> : <NewButton onPress={onToggleFlag}/>}
@@ -43,4 +43,4 @@ const NewPathForm = ({ enterPathFlag, onPathEntered, onToggleFlag }) => (
   </div>
 );
 
-export default NewPathForm;
+export default PathForm;

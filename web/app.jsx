@@ -1,6 +1,5 @@
 import React from 'react';
 import style from './app.scss';
-import DevTools from "mobx-react-devtools";
 import { Watchers, WatchersList } from './components/watchers';
 import Header from './components/header';
 import Control from './components/control';

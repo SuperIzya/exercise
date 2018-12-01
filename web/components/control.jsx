@@ -10,6 +10,20 @@ import Zoom from '@material-ui/core/Zoom/Zoom';
 import Send from '@material-ui/icons/Send';
 import client from '../utils/client';
 
+class ButtonState {
+  @observable disabled = true;
+}
+
+const SendButton = observer(({data, send}) => (
+  <Fab color="default"
+       disabled={data.disabled}
+       aria-label="Close"
+       onMouseUp={send}>
+    <Send/>
+  </Fab>
+));
+
+
 class ControlState {
   @observable show = false;
   
@@ -20,38 +34,41 @@ class ControlState {
   hideControl = () => this.show = false;
 }
 
+
 class Form extends React.Component {
   state = {
     path: '',
     data: ''
   };
   
-  onEntered = field => event => this.setState({ [field]: this.state[field] + event.key });
+  buttonState = new ButtonState();
   
-  renderButton() {
-    const isDisabled = !this.state.path || !this.state.data;
-    return (
-      <Fab color="default"
-           disabled={isDisabled}
-           aria-label="Close"
-           onMouseUp={() => this.props.send(this.state)}>
-        <Send/>
-      </Fab>
-    )
-  }
+  onBlur = field => event => {
+    if (event.target.value)
+      this.setState({ [field]: event.target.value });
+  };
+  send = () => this.props.send(this.state);
+  
+  onChange = other => event => {
+    this.buttonState.disabled = !this.state[other] || !event.target.value;
+  };
   
   render() {
     return (
       <div className={style.fields}>
         <TextField label={'z-node'}
                    placeholder={'Enter z-node path'}
-                   value={this.state.path}
-                   onKeyPress={this.onEntered('path')}/>
+                   defaultValue={this.state.path}
+                   onChange={this.onChange('data')}
+                   onBlur={this.onBlur('path')}/>
         <TextField label={'data'}
-                   value={this.state.data}
-                   onKeyPress={this.onEntered('data')}
+                   defaultValue={this.state.data}
+                   onChange={this.onChange('path')}
+                   onBlur={this.onBlur('data')}
                    placeholder={'Enter data to write to the node'}/>
-        {this.renderButton()}
+        <div className={style.send}>
+          <SendButton data={this.buttonState} send={this.send}/>
+        </div>
       </div>
     )
   }

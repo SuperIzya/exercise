@@ -13,7 +13,7 @@ import org.apache.zookeeper.ZooDefs.Ids
 import org.apache.zookeeper.data.Stat
 import org.apache.zookeeper.{CreateMode, WatchedEvent, ZooKeeper}
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration._
 
 /** *
   * Actor that manages the connection to ZK and creates and manages watchers for z-nodes.
@@ -25,14 +25,25 @@ class Manager(host: String,
 
   val connectionString = s"$host:$port"
 
+  /**
+    * Flag indicating that connection to zk was actually established
+    */
   var connected: Boolean = false
-  // ActorRef associated with server, when it waits for initial connection
+  /**
+    *  ActorRef associated with server, when it waits for initial connection
+    */
   var server: ActorRef = _
-  // Connection to the zookeeper
+  /**
+    * Connection to the zookeeper
+    */
   var zkConnection: ZooKeeper = connect
-  // Map of all watchers (path -> WatcherActor)
+  /**
+    *  Map of all watchers (path -> WatcherActor)
+    */
   var watchers: Map[String, ActorRef] = Map.empty
-  // Reverse map of watcher. Needed for convenient delete
+  /**
+    * Reverse map of watcher. Needed for convenient delete
+    */
   var reverseMap: Map[ActorRef, String] = Map.empty
 
   def connect: ZooKeeper = new ZooKeeper(connectionString, sessionTimeout.toMillis.toInt, watchConnection)
@@ -84,14 +95,18 @@ class Manager(host: String,
     case WriteToNode(path, stringData) =>
       val data = ByteString(stringData, "utf-8").toArray
       val callback: StatCallback = (_, _, _, stat: Stat) => {
-        if (stat == null) {
-          val acl = Ids.OPEN_ACL_UNSAFE
-          val res = zkConnection.create(path, data, acl, CreateMode.PERSISTENT)
-          log.info(s"Created node $path with log $stringData. Result: $res")
-        }
-        else {
-          log.info(s"Writing to node $path data $stringData, version ${stat.getVersion}")
-          zkConnection.setData(path, data, stat.getVersion)
+        try {
+          if (stat == null) {
+            val acl = Ids.OPEN_ACL_UNSAFE
+            val res = zkConnection.create(path, data, acl, CreateMode.PERSISTENT)
+            log.info(s"Created node $path with log $stringData. Result: $res")
+          }
+          else {
+            log.info(s"Writing to node $path data $stringData, version ${stat.getVersion}")
+            zkConnection.setData(path, data, stat.getVersion)
+          }
+        } catch {
+          case ex: Throwable => log.error(ex, "Error occurred while writing to zk")
         }
       }
       log.info("Going to write data to zk")

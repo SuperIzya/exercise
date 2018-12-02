@@ -30,6 +30,7 @@ const Form = ({ enterPath, onPathEntered }) => !enterPath ? null :
         variant="outlined"
         className={style.text}
         onBlur={onPathEntered}
+        onKeyUp={evt => evt.keyCode === 13 && onPathEntered(evt)}
       />
     </Zoom>
   </div>);

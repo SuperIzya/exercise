@@ -109,7 +109,6 @@ class Manager(host: String,
           case ex: Throwable => log.error(ex, "Error occurred while writing to zk")
         }
       }
-      log.info("Going to write data to zk")
       zkConnection.exists(path, false, callback, null)
     case Terminated(actor) => reverseMap.get(actor) match {
       case Some(path) =>

@@ -9,13 +9,10 @@ import SwipeableViews from 'react-swipeable-views';
 import PathForm from './path-form';
 
 class WatchersList {
-  @observable watchers = ['/a', '/b'];
+  @observable watchers = [];
   @observable enterPath = false;
   @observable selectedIndex = 0;
-  watchData = {
-    '/a': new PathData(),
-    '/b': new PathData()
-  };
+  watchData = {};
   
   @action.bound
   setIndex = index => {
@@ -53,7 +50,6 @@ const WatcherTabs = observer(({ list, indexSetter }) => {
         <AppBar position={'static'} color={'default'}>
           <Tabs
             fullWidth={true}
-            centered={true}
             value={list.selectedIndex}
             onChange={indexSetter}
             indicatorColor="primary"
